@@ -1,2 +1,4 @@
-# Symmetric-functions
-This git collects the code, notes, and all relevant information on the Symmetric functions project.
+# A method to determine the injectivity of symmetric functions
+A project by: Harper Niergarth, Vixail Hadelyn, Wenhui Li, Wieyou Li
+
+This project studies the injective of symmetric functions, here is found the source code libraries, and the informal notes.
