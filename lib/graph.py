@@ -74,6 +74,22 @@ class symm_graph:
     '''
 
     @staticmethod
+    def normalize(nodes: list[Composition])->list[Composition]:
+        '''
+        Normalize a list of compositions by their gcd.
+        '''
+        for node in nodes:
+            node.norm()
+
+        # Remove duplicates
+        keys = list(range(len(nodes)))
+        for i in range(len(nodes)):
+            for j in range(i):
+                if(nodes[i]==nodes[j] and i in keys and j in keys):
+                    keys.remove(i)
+        return nodes
+
+    @staticmethod
     def connect(nodes: list[Composition], detail = PO_DETAIL.Implicit)->CompositionGraph:
         '''
         Run a component bases tree insertion like algortihm.
@@ -90,12 +106,7 @@ class symm_graph:
         2. Connect a new node based on the comparison criteria
         '''
 
-        #Remove duplicates
         keys = list(range(len(nodes)))
-        for i in range(len(nodes)):
-            for j in range(i):
-                if(nodes[i] == nodes[j]):
-                    keys.remove(i)
 
         # Setup the graph
         graph: dict[int, set[int]] = dict([(i, set()) for i in keys])
