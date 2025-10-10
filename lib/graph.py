@@ -9,17 +9,28 @@ PO_DETAIL = enum.Enum('Detail', {"Abstract": '', 'Implicit': 'I', "Complete": 'C
 class CompositionGraph ():
     '''
     A compositionGraph is composed of a graph with edges and back edges,
-        along with a index dictionary which associates the keys to specific compositions.
+    >along with a index dictionary which associates the keys to specific compositions.
+
+    **Attributes**:\n
+    >graph: A dictionary mapping each node key to a set of children keys.\n
+    >nodes: A list of compositions, where the index is the key in the graph.\n
+    >detail: The detail level of the graph, see PO_DETAIL for options.\n
+    >tikz_str: A string representation of the graph in Tikz format.\n
+
+    **Methods**:\n
+    >below: Return the set of all nodes below a given key.
     '''
+
+    _tizk_settings: str = "random seed = 1, spring layout, node distance=20mm"
+    _spacing: int = 0 #0 for tight, 1 for spaced
 
     _detail = PO_DETAIL.Abstract
     graph: dict[int, set[int]] = dict()
-    nodes: list[Composition] = list()
-    tizk_settings: str = "random seed = 2, spring layout, node distance=25mm"
+    nodes: dict[int, Composition] = dict()
 
     def __init__(self, _graph: dict[int, set[int]], _nodes: list[Composition], detail = PO_DETAIL.Implicit):
         self.graph = _graph
-        self.nodes = _nodes
+        self.nodes = dict([(i, _nodes[i]) for i in _graph.keys()])
         self._detail = detail
 
     @property
@@ -39,12 +50,18 @@ class CompositionGraph ():
 
     @property
     def tikz_str(self):
+        spaceStr = [['', ''], [' ', '\n']][self._spacing]
         label = lambda key: str(self.nodes[key])
-        children = lambda key: ', '.join(map(label, self.graph[key]))
-        connections = ''.join(map(lambda key: "{} -> {{ {} }};".format(label(key), children(key)) if(self.graph[key]) 
+        children = lambda key: ",{}".format(spaceStr[0]).join(map(label, self.graph[key]))
+        connections = spaceStr[1].join(map(lambda key: "{}->{space}{{{}}};"
+                                  .format(label(key), children(key), space = spaceStr[0]) if(self.graph[key]) 
                                else (label(key) + ';'),
                                self.graph))
-        return '\\graph[{}]{{ {} }};'.format(self.tizk_settings, connections)
+        return '\\begin{{tikzpicture}}\\graph[{}]{line}{{{line}{}{line}}};\\end{{tikzpicture}}'.format(self._tizk_settings, connections, line = spaceStr[1])
+    
+    def plot(self):
+        import matplotlib.pyplot as plt
+        raise NotImplementedError("Plotting not yet implemented")
 
 
 class symm_graph:
@@ -53,6 +70,7 @@ class symm_graph:
 
     **Methods**:
     >connect: Return a composition graph with vertices from a given list, and directed edges for alpha > beta.
+
     '''
 
     @staticmethod
@@ -87,7 +105,8 @@ class symm_graph:
             queue: list[int] = list()
             for index in keys:
                 # Pick a new node to try and insert
-                for _head in heads:
+                heads_copy = heads.copy()
+                for _head in heads_copy:
                     queue = [_head]
                     while(queue):
                         search_index = queue.pop(0) # Breadth first search

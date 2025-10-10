@@ -96,6 +96,17 @@ class Composition(list[int]):
         return list(map(Composition, itertools.product(list(range(0, max + 1)), repeat=length)))
 
     def __eq__(self, other)->bool:
+        '''
+        **Examples**:
+        >>> Composition([1,2,3]) == Composition([2,4,6])
+        True
+        
+        >>> Composition([0,0,0]) == Composition([2,4,6])
+        False
+
+        >>> Composition([1,2,3]) == Composition([2,4,5])
+        False
+        '''
         if(type(self)!=type(other)):
             return False
         if(self.iszero or other.iszero):
@@ -104,9 +115,32 @@ class Composition(list[int]):
             for i in range(len(self)):
                 if self[i]*other.sum != other[i]*self.sum: return False
             return True
+        
+    def exact_eq(self, other)->bool:
+        '''Check if two compositions are identical'''
+        if(type(self)!=type(other)):
+            return False
+        if(len(self)!=len(other)):
+            return False
+        for i in range(len(self)):
+            if self[i] != other[i]: return False
+        return True
 
     def __gt__(self, other)->bool:
-        '''Provides a standard partial ordering on compositions deriving from definitions in the notes'''
+        '''Provides a standard partial ordering on compositions deriving from definitions in the notes
+        
+        **Examples**:
+        >>> Composition([3,2,0]) > Composition([2,2,1])
+        True
+        
+        >>> Composition([1,0,0]) > Composition([4,0,1])
+        True
+        
+        >>> Composition([2,0,1]) > Composition([1,2,0])
+        False
+        
+        >>> Composition([1,2,0]) > Composition([2,0,1])
+        False'''
         if(self.iszero or other.iszero):
             return False
         if(self==other):
